@@ -1,65 +1,66 @@
 package ressources;
 
 import entities.Logement;
-import metiers.LogementBusiness;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
+import filters.Secured;
+import metiers.LogementBusiness;
 
 @Path("logements")
 public class LogementRessources {
     public static LogementBusiness logementMetier = new LogementBusiness();
 
-    @POST
-    @Consumes(MediaType.APPLICATION_XML)
-    public Response addLogement(Logement l) {
-        if(logementMetier.addLogement(l))
-            return  Response.status(Status.CREATED).build();
-        return  Response.status(Status.NOT_FOUND).build();
+    public LogementRessources() {
     }
-    public Response getLogements(String delegation, String reference) {
-        List<Logement> liste=new ArrayList<Logement>();
-        if(reference == null && delegation != null) {
-            liste = logementMetier.getLogementsByDeleguation(delegation);
 
-        } else if(delegation == null && reference !=null ) {
-            liste =logementMetier.getLogementsListeByref(Integer.parseInt(reference));
+    @POST
+    @Consumes({"application/xml"})
+    public Response addLogement(Logement l) {
+        if (logementMetier.addLogement(l) )
+            return Response.status(Status.CREATED).build() ;
+        return Response.status(Status.NOT_FOUND).build();
+    }
+
+    @Secured
+    @GET
+    @Produces({"application/json"})
+    public Response getLogements(@QueryParam("delegation") String delegation, @QueryParam("reference") String reference) {
+        new ArrayList();
+        List liste;
+        if (reference == null && delegation != null) {
+            liste = logementMetier.getLogementsByDeleguation(delegation);
+        } else if (delegation == null && reference != null) {
+            liste = logementMetier.getLogementsListeByref(Integer.parseInt(reference));
         } else {
-            liste = logementMetier.getLogements() ;
+            liste = logementMetier.getLogements();
         }
 
-        if(liste.size()==0)
-            return  Response.status(Status.NOT_FOUND).build();
-        return  Response.status(Status.OK).entity(liste).build();
+        return liste.size() == 0 ? Response.status(Status.NOT_FOUND).build() : Response.status(Status.OK).entity(liste).build();
     }
 
     @PUT
-    @Consumes
-    public Response updateLogement(Logement updatedLogement, int reference) {
-
-
-        if (logementMetier.updateLogement(reference,updatedLogement)) {
-            return Response.status(Status.OK).build();
-        } else {
-            return Response.status(Status.NOT_FOUND).build();
-        }
+    @Consumes({"application/xml"})
+    @Path("{id}")
+    public Response updateLogement(Logement updatedLogement, @PathParam("id") int reference) {
+        return logementMetier.updateLogement(reference, updatedLogement) ? Response.status(Status.OK).build() : Response.status(Status.NOT_FOUND).build();
     }
 
+    @Path("{id}")
     @DELETE
-    @Consumes
-    public  Response deleteLogement(int reference){
-        if(logementMetier.deleteLogement(reference))
-            return Response.status(Status.OK).build();
-
-
-        return Response.status(Status.NOT_FOUND).build();
-
+    public Response deleteLogement(@PathParam("id") int reference) {
+        return logementMetier.deleteLogement(reference) ? Response.status(Status.OK).build() : Response.status(Status.NOT_FOUND).build();
     }
 
 }
