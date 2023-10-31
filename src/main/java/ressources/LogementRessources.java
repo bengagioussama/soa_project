@@ -23,8 +23,6 @@ public class LogementRessources {
             return  Response.status(Status.CREATED).build();
         return  Response.status(Status.NOT_FOUND).build();
     }
-    @GET
-    @Consumes(MediaType.APPLICATION_XML)
     public Response getLogements(String delegation, String reference) {
         List<Logement> liste=new ArrayList<Logement>();
         if(reference == null && delegation != null) {
@@ -41,7 +39,8 @@ public class LogementRessources {
         return  Response.status(Status.OK).entity(liste).build();
     }
 
-
+    @PUT
+    @Consumes
     public Response updateLogement(Logement updatedLogement, int reference) {
 
 
@@ -52,7 +51,8 @@ public class LogementRessources {
         }
     }
 
-
+    @DELETE
+    @Consumes
     public  Response deleteLogement(int reference){
         if(logementMetier.deleteLogement(reference))
             return Response.status(Status.OK).build();
